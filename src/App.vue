@@ -1,5 +1,7 @@
 <template>
-  <RubricsTree />
+  <div class="container">
+    <RubricsTree />
+  </div>
 </template>
 
 <script>
@@ -12,3 +14,11 @@ export default {
   },
 };
 </script>
+
+<style>
+.container {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 0 20px;
+}
+</style>

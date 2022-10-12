@@ -1,54 +1,28 @@
 <template>
-  <strong>{{ totalCount }}</strong>
-  <div class="tree">
-    <span>Разрешить пустые</span>
-    <input type="checkbox" v-model="allowEmpty" /><br />
-    <button v-if="tree && tree.length" @click="toggleAll()">
-      Свернуть всё
-      <!--  TODo менять текст-->
-    </button>
+  <div class="loader" v-if="loading">Загрузка...</div>
+  <strong class="total-count">{{ totalCount }}</strong>
+  <span>Разрешить пустые</span>
+  <input type="checkbox" v-model="allowEmpty" /><br />
+  <button v-if="tree && tree.length" @click="toggleAll()">
+    {{ btnText }}
+  </button>
+  <ul class="tree">
     <template v-if="allShow">
-      <div v-for="branch in tree" :key="branch.id">
-        <a class="tree__link" :href="branch.url"
-          >{{ branch.title }} (count: {{ branch.count }}, all:
-          {{ totalBranchCount(branch.id) }})
-        </a>
-        <input
-          type="checkbox"
-          @input="select(branch.id)"
-          :checked="selectedIDArray.includes(branch.id)"
-        />
-        <button
-          v-if="branch.children && branch.children.length"
-          @click="toggle(branch.id)"
-        >
-          Развернуть
-          <!--  TODo менять текст-->
-        </button>
-        <div class="sub-tree__links" v-if="opendIDArray.includes(branch.id)">
-          <div v-for="children in branch.children" :key="children.id">
-            <a class="sub-tree__link" :href="children.url">
-              {{ children.title }} (count: {{ children.count }})
-            </a>
-            <input
-              type="checkbox"
-              @input="select(children.id)"
-              :checked="selectedIDArray.includes(children.id)"
-            /><!--  TODo Вынести в метод-->
-          </div>
-        </div>
-      </div>
+      <RubricsBranch :tree="tree" />
     </template>
-  </div>
+  </ul>
 </template>
 
 <script>
-import { mapActions, mapGetters } from "vuex";
+import { mapActions, mapGetters, mapMutations } from "vuex";
+import RubricsBranch from "./RubricsBranch.vue";
 
 export default {
   name: "rubrics-tree",
+  components: { RubricsBranch },
   data() {
     return {
+      loading: false,
       tree: [],
       allShow: true,
       opendIDArray: [],
@@ -60,71 +34,51 @@ export default {
     ...mapActions({
       fetchTree: "RubricsTree/fetchTree",
     }),
+    ...mapMutations({
+      addSelectedId: "RubricsTree/addSelectedId",
+    }),
     toggleAll() {
       this.allShow = !this.allShow;
       this.opendIDArray = [];
     },
-    toggle(id) {
-      if (this.opendIDArray.includes(id)) {
-        const arrayId = this.opendIDArray.findIndex((el) => el.id === id);
-        this.opendIDArray.splice(arrayId, 1);
-        return;
-      }
-      this.opendIDArray.push(id);
-    },
-    totalBranchCount(id) {
-      if (!this.tree.length) return;
-
-      let count = 0;
-      const branch = this.tree.find((el) => {
-        return el.id === id;
-      });
-
-      if (!branch) console.log(id);
-
-      count += branch.count;
-
-      if (!branch.children.length) return count;
-
-      branch.children.forEach((cihild) => {
-        count += cihild.count;
-      });
-
-      return count;
-    },
-    select(id) {
-      if (this.selectedIDArray.includes(id)) {
-        const arrayId = this.selectedIDArray.findIndex((el) => el === id);
-        this.selectedIDArray.splice(arrayId, 1);
-      } else {
-        this.selectedIDArray.push(id);
-      }
-    },
   },
   watch: {
-    allowEmpty(value) {
-      value ? this.fetchTree({ allowEmpty: 1 }) : this.fetchTree();
+    async allowEmpty(value) {
+      this.loading = true;
+      value ? await this.fetchTree({ allowEmpty: 1 }) : await this.fetchTree();
+      this.loading = false;
     },
   },
   computed: {
     ...mapGetters({
+      getSelectedId: "RubricsTree/getSelectedId",
       getTree: "RubricsTree/getTree",
     }),
+    btnText() {
+      return this.allShow ? "Свернуть всё" : "Развернуть всё";
+    },
     totalCount() {
       if (!this.tree?.length) return;
       let count = 0;
 
-      function recursive(that, array) {
+      function recursive(that, array, selectedChild) {
         for (let index = 0; index < array.length; index++) {
           const el = array[index];
 
-          if ("children" in el && el.children.length > 0) {
-            if (that.selectedIDArray.includes(el.id)) {
-              count += that.totalBranchCount(el.id);
-            }
+          if (selectedChild) {
+            // const rubric = document.getElementById(el.id);
+            // const input = rubric.querySelector("input");
+            // input.checked = true;
+          }
 
-            recursive(that, el.children);
-          } else if (that.selectedIDArray.includes(el.id)) {
+          if ("children" in el && el.children.length > 0) {
+            if (that.getSelectedId.includes(el.id)) {
+              count += el.totalcount;
+              recursive(that, el.children, true);
+            } else {
+              recursive(that, el.children);
+            }
+          } else if (that.getSelectedId.includes(el.id)) {
             count += el.count;
           }
         }
@@ -136,7 +90,9 @@ export default {
     },
   },
   async created() {
+    this.loading = true;
     await this.fetchTree();
+    this.loading = false;
     this.tree = this.getTree;
   },
   mounted() {
@@ -155,16 +111,30 @@ export default {
   },
 };
 </script>
-<style scoped>
-.tree__link {
-  display: inline-block;
-  margin-right: 20px;
+<style>
+.tree__branch {
+  margin-left: 20px;
   margin-bottom: 10px;
 }
 
-.sub-tree__link {
-  display: inline-block;
-  margin-left: 20px;
-  margin-bottom: 5px;
+input[type="checkbox"] {
+  width: 15px;
+  height: 15px;
+  margin-left: 10px;
+  margin-right: 20px;
+}
+
+.total-count {
+  font-size: 20px;
+  display: block;
+}
+
+.loader {
+  font-weight: 600;
+  font-size: 30px;
+  position: absolute;
+  top: 30px;
+  left: 50%;
+  transform: translate(-50%);
 }
 </style>
