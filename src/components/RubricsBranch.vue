@@ -10,8 +10,8 @@
         >{{ branch.title }} (count: {{ branch.count }}, all:
         {{ totalBranchCount(branch) }})
       </a>
-      <input
-        type="checkbox"
+      <ui-checkbox
+        size="small"
         @input="select($event, branch.id)"
         :checked="getSelectedId.includes(branch.id)"
       />

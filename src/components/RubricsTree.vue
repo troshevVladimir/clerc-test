@@ -1,16 +1,20 @@
 <template>
-  <div class="loader" v-if="loading">Загрузка...</div>
-  <strong class="total-count">{{ totalCount }}</strong>
-  <span>Разрешить пустые</span>
-  <input type="checkbox" v-model="allowEmpty" /><br />
-  <button v-if="tree && tree.length" @click="toggleAll()">
-    {{ btnText }}
-  </button>
-  <ul class="tree">
-    <template v-if="allShow">
-      <RubricsBranch :tree="tree" />
-    </template>
-  </ul>
+  <section>
+    <div class="container">
+      <strong class="total-count">{{ totalCount }}</strong>
+      <span>Разрешить пустые</span>
+      <ui-checkbox size="small" type="checkbox" v-model="allowEmpty" /><br />
+      <button v-if="tree && tree.length" @click="toggleAll()">
+        {{ btnText }}
+      </button>
+      <ul class="tree">
+        <div class="loader" v-if="loading">Загрузка...</div>
+        <template v-if="allShow">
+          <RubricsBranch :tree="tree" />
+        </template>
+      </ul>
+    </div>
+  </section>
 </template>
 
 <script>
@@ -124,6 +128,11 @@ input[type="checkbox"] {
   margin-right: 20px;
 }
 
+.tree {
+  position: relative;
+  margin-bottom: 50px;
+}
+
 .total-count {
   font-size: 20px;
   display: block;
@@ -133,7 +142,7 @@ input[type="checkbox"] {
   font-weight: 600;
   font-size: 30px;
   position: absolute;
-  top: 30px;
+  top: -50px;
   left: 50%;
   transform: translate(-50%);
 }
