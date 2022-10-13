@@ -1,24 +1,2 @@
-# clerc-text
-
-## Project setup
-```
-yarn install
-```
-
-### Compiles and hot-reloads for development
-```
-yarn serve
-```
-
-### Compiles and minifies for production
-```
-yarn build
-```
-
-### Lints and fixes files
-```
-yarn lint
-```
-
-### Customize configuration
-See [Configuration Reference](https://cli.vuejs.org/config/).
+Для запуска проекта `yarn && yarn serve`
+Для сборки проекта `yarn && yarn build`
