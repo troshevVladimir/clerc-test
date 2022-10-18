@@ -65,20 +65,13 @@ export default {
       if (!this.tree?.length) return;
       let count = 0;
 
-      function recursive(that, array, selectedChild) {
+      function recursive(that, array) {
         for (let index = 0; index < array.length; index++) {
           const el = array[index];
-
-          if (selectedChild) {
-            // const rubric = document.getElementById(el.id);
-            // const input = rubric.querySelector("input");
-            // input.checked = true;
-          }
 
           if ("children" in el && el.children.length > 0) {
             if (that.getSelectedId.includes(el.id)) {
               count += el.totalcount;
-              recursive(that, el.children, true);
             } else {
               recursive(that, el.children);
             }

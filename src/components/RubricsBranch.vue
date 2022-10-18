@@ -20,7 +20,6 @@
         @click="toggle(branch.id)"
       >
         Свернуть/Развернуть
-        <!-- Для динамического текста надо отдельный компонент кнопки -->
       </button>
     </div>
     <div v-show="getOpendId.includes(branch.id)">
@@ -29,19 +28,16 @@
           v-if="branch.children && branch.children.length > 4"
           :tree="branch.children"
         ></rubrics-branch>
-        <RubricsLeaf v-else :items="branch.children"></RubricsLeaf>
       </ul>
     </div>
   </li>
 </template>
 
 <script>
-import RubricsLeaf from "./RubricsLeaf.vue";
 import { mapGetters, mapMutations } from "vuex";
 
 export default {
   name: "rubrics-branch",
-  components: { RubricsLeaf },
   props: {
     tree: {
       type: Array,
